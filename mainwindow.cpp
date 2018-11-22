@@ -1,3 +1,4 @@
+#include <QMessageBox>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -7,14 +8,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     QString display_num;
     ui->setupUi(this);
-    this->min_left = 25;
-    this->sec_left = 0;
+    this->init_time(25, 0);
     display_num = this->format_time(this->min_left, this->sec_left);
     this->ui->lcdNumber->display(display_num);
     this->m_timer = new QTimer();
     connect(this->m_timer, SIGNAL(timeout()), this, SLOT(update_lcd()));
     connect(this->ui->pushButton_start, SIGNAL(clicked()), this, SLOT(btn_start()));
     connect(this->ui->pushButton_stop, SIGNAL(clicked()), this, SLOT(btn_stop()));
+}
+
+void MainWindow::init_time(int min, int sec){
+    this->min_left = min;
+    this->sec_left = sec;
 }
 
 QString MainWindow::format_time(int min, int sec){
@@ -38,8 +43,7 @@ void MainWindow::btn_start(){
         return;
     }
     QString display_num;
-    this->min_left = 25;
-    this->sec_left = 0;
+    this->init_time(0, 10);
     display_num = this->format_time(this->min_left, this->sec_left);
     this->ui->lcdNumber->display(display_num);
     this->m_timer->start(1000);
@@ -55,6 +59,12 @@ void MainWindow::update_lcd(){
     QString display_num;
     if (this->sec_left == 0){
         if (this->min_left == 0){
+            this->m_timer->stop();
+            this->setWindowState( (windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
+            this->activateWindow();
+            QMessageBox msg;
+            msg.setText("Congrats!");
+            msg.exec();
             return;
         }
         this->min_left -= 1;

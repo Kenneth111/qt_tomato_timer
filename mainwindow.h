@@ -23,6 +23,7 @@ private:
     int min_left;
     int sec_left;
     QString format_time(int, int);
+    void init_time(int, int);
 
 public slots:
     void update_lcd();
