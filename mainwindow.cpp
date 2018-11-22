@@ -7,14 +7,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     QString display_num;
+
     ui->setupUi(this);
-    this->init_time(25, 0);
-    display_num = this->format_time(this->min_left, this->sec_left);
-    this->ui->lcdNumber->display(display_num);
+    this->min_setting = 25;
+    this->sec_setting = 0;
+    this->init_time(this->min_setting, this->sec_setting);
+    this->update_lcd(this->min_left, this->sec_left);
     this->m_timer = new QTimer();
-    connect(this->m_timer, SIGNAL(timeout()), this, SLOT(update_lcd()));
+    connect(this->m_timer, SIGNAL(timeout()), this, SLOT(update_ctime()));
     connect(this->ui->pushButton_start, SIGNAL(clicked()), this, SLOT(btn_start()));
     connect(this->ui->pushButton_stop, SIGNAL(clicked()), this, SLOT(btn_stop()));
+    connect(this->ui->pushButton_setting, SIGNAL(clicked()), this, SLOT(show_settings()));
+    connect(&(this->settings_dialog), SIGNAL(setup(int,int)), this, SLOT(setup(int,int)));
 }
 
 void MainWindow::init_time(int min, int sec){
@@ -43,9 +47,8 @@ void MainWindow::btn_start(){
         return;
     }
     QString display_num;
-    this->init_time(0, 10);
-    display_num = this->format_time(this->min_left, this->sec_left);
-    this->ui->lcdNumber->display(display_num);
+    this->init_time(this->min_setting, this->sec_setting);
+    this->update_lcd(this->min_left, this->sec_left);
     this->m_timer->start(1000);
 }
 
@@ -55,8 +58,14 @@ void MainWindow::btn_stop(){
     }
 }
 
-void MainWindow::update_lcd(){
+void MainWindow::update_lcd(int min, int sec){
     QString display_num;
+    display_num = this->format_time(min, sec);
+    this->ui->lcdNumber->display(display_num);
+}
+
+void MainWindow::update_ctime(){
+
     if (this->sec_left == 0){
         if (this->min_left == 0){
             this->m_timer->stop();
@@ -72,8 +81,21 @@ void MainWindow::update_lcd(){
     } else {
         this->sec_left -= 1;
     }
-    display_num = this->format_time(this->min_left, this->sec_left);
-    this->ui->lcdNumber->display(display_num);
+    this->update_lcd(this->min_left, this->sec_left);
+}
+
+void MainWindow::show_settings(){
+    this->settings_dialog.show();
+}
+
+void MainWindow::setup(int min, int sec){
+    if(this->m_timer->isActive()){
+        this->m_timer->stop();
+    }
+    this->min_setting = min;
+    this->sec_setting = sec;
+    this->init_time(this->min_setting, this->sec_setting);
+    this->update_lcd(min, sec);
 }
 
 MainWindow::~MainWindow()
