@@ -13,11 +13,16 @@ MainWindow::MainWindow(QWidget *parent) :
     this->sec_setting = 0;
     this->init_time(this->min_setting, this->sec_setting);
     this->update_lcd(this->min_left, this->sec_left);
+    // a timer to update current time
     this->m_timer = new QTimer();
     connect(this->m_timer, SIGNAL(timeout()), this, SLOT(update_ctime()));
+    // start timer button
     connect(this->ui->pushButton_start, SIGNAL(clicked()), this, SLOT(btn_start()));
+    // stop timer button
     connect(this->ui->pushButton_stop, SIGNAL(clicked()), this, SLOT(btn_stop()));
+    // the button to show settings dialog
     connect(this->ui->pushButton_setting, SIGNAL(clicked()), this, SLOT(show_settings()));
+    // the main window receives timer settings from the settings dialog
     connect(&(this->settings_dialog), SIGNAL(setup(int,int)), this, SLOT(setup(int,int)));
 }
 
@@ -26,6 +31,7 @@ void MainWindow::init_time(int min, int sec){
     this->sec_left = sec;
 }
 
+// format current time to show on the lcd number widget
 QString MainWindow::format_time(int min, int sec){
     QString str_min;
     QString str_sec;
