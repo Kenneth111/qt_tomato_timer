@@ -25,6 +25,7 @@ private:
     int sec_left;
     int min_setting;
     int sec_setting;
+    QString appName;
     SettingsDialog settings_dialog;
     QString format_time(int, int);
     void init_time(int, int);

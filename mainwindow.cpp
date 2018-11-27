@@ -1,7 +1,10 @@
 #include <QMessageBox>
+#include <QDateTime>
+#include "windows.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+// this is for solving PSTR conversion problem in GetWindowText
+#define UNICODE
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -9,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QString display_num;
 
     ui->setupUi(this);
+    this->appName = "";
     this->min_setting = 25;
     this->sec_setting = 0;
     this->init_time(this->min_setting, this->sec_setting);
@@ -52,6 +56,8 @@ void MainWindow::btn_start(){
     if(this->m_timer->isActive()){
         return;
     }
+    this->ui->textBrowser->setText("");
+    this->appName = "";
     QString display_num;
     this->init_time(this->min_setting, this->sec_setting);
     this->update_lcd(this->min_left, this->sec_left);
@@ -71,7 +77,23 @@ void MainWindow::update_lcd(int min, int sec){
 }
 
 void MainWindow::update_ctime(){
-
+    HWND winHandle = GetForegroundWindow();
+    int cTxtLen = GetWindowTextLength(winHandle);
+    PSTR pszMem = (PSTR) VirtualAlloc((LPVOID) NULL,
+                        (DWORD) (cTxtLen + 1), MEM_COMMIT,
+                        PAGE_READWRITE);
+    GetWindowText(winHandle, pszMem,
+                        cTxtLen + 1);
+    // to save Chinese characters into QString, fromLocal8Bit is needed
+    QString tmpName = QString::fromLocal8Bit(pszMem);
+    if(this->appName != tmpName){
+        this->appName = tmpName;
+        QDateTime time = QDateTime::currentDateTime();
+        this->ui->textBrowser->append("\n");
+        this->ui->textBrowser->append(time.toString("hh:mm:ss"));
+        this->ui->textBrowser->append(this->appName);
+    }
+    VirtualFree(pszMem, 0, MEM_RELEASE);
     if (this->sec_left == 0){
         if (this->min_left == 0){
             this->m_timer->stop();
