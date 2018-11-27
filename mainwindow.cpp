@@ -77,9 +77,13 @@ void MainWindow::update_ctime(){
             this->m_timer->stop();
             this->setWindowState( (windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
             this->activateWindow();
-            QMessageBox msg;
-            msg.setText("Congrats!");
-            msg.exec();
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, tr("Congrats!"),
+                                          tr("Do you want to restart?"),
+                                            QMessageBox::Yes | QMessageBox::No);
+            if(reply == QMessageBox::Yes){
+                this->btn_start();
+            }
             return;
         }
         this->min_left -= 1;
